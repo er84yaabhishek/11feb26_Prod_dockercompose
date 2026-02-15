@@ -1,4 +1,17 @@
-docker-compose.editor.yml
+🚀 Code Server Setup (Docker + Apache + SSL)
+
+This project runs code-server (VS Code in Browser) using Docker and exposes it securely via:
+
+Docker Compose
+
+Apache Reverse Proxy
+
+Let's Encrypt SSL
+
+Subdomain: editor.soft84ya.shop
+
+📦 1️⃣ Docker Setup
+📁 File: docker-compose.editor.yml
 version: "3.8"
 
 services:
@@ -9,8 +22,8 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
-      - PASSWORD=12345678
-      - SUDO_PASSWORD=12345678
+      - PASSWORD=1234
+      - SUDO_PASSWORD=1234
       - DEFAULT_WORKSPACE=/config/workspace
       - PWA_APPNAME=code-server
     volumes:
@@ -19,20 +32,18 @@ services:
       - "8079:8443"
     restart: unless-stopped
 
-    docker-compose -f docker-compose.editor.yml up -d --build
+▶ Start Container
+docker-compose -f docker-compose.editor.yml up -d --build
 
+🌐 2️⃣ Apache Reverse Proxy Setup
+📁 HTTP Config
 
-=====================================================================
-
-🌐 2️⃣ Apache Reverse Proxy Configuration
-HTTP Config
 File: /etc/apache2/sites-available/editor.soft84ya.shop.conf
 
 <VirtualHost *:80>
     ServerName editor.soft84ya.shop
     Redirect permanent / https://editor.soft84ya.shop/
 </VirtualHost>
-===================================================================
 
 🔐 HTTPS + SSL Config
 
@@ -62,51 +73,24 @@ File: /etc/apache2/sites-available/editor.soft84ya.shop-le-ssl.conf
 </VirtualHost>
 </IfModule>
 
-🔧 Enable Required Apache Modules
+🔧 3️⃣ Enable Required Apache Modules
 sudo a2enmod proxy
 sudo a2enmod proxy_http
 sudo a2enmod proxy_wstunnel
 sudo a2enmod rewrite
 sudo a2enmod ssl
 
-📜 Enable Site
-
+📜 4️⃣ Enable Site
 sudo a2ensite editor.soft84ya.shop.conf
 sudo a2ensite editor.soft84ya.shop-le-ssl.conf
 sudo systemctl reload apache2
 
-🔐 SSL Certificate (Let's Encrypt)
-
+🔐 5️⃣ Generate SSL Certificate
 sudo certbot --apache -d editor.soft84ya.shop
 
-
-
-🌍 Access
-
-After setup:
-
-
+🌍 Access URL
 https://editor.soft84ya.shop
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Login using the password defined in docker-compose.editor.yml.
 
