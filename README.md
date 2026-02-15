@@ -1,5 +1,6 @@
 docker-compose.editor.yml
----
+version: "3.8"
+
 services:
   code-server:
     image: lscr.io/linuxserver/code-server:latest
@@ -17,8 +18,26 @@ services:
     ports:
       - "8079:8443"
     restart: unless-stopped
+
+    docker-compose -f docker-compose.editor.yml up -d --build
+
+
 =====================================================================
-editor.soft84ya.shop-le-ssl.conf
+
+🌐 2️⃣ Apache Reverse Proxy Configuration
+HTTP Config
+File: /etc/apache2/sites-available/editor.soft84ya.shop.conf
+
+<VirtualHost *:80>
+    ServerName editor.soft84ya.shop
+    Redirect permanent / https://editor.soft84ya.shop/
+</VirtualHost>
+===================================================================
+
+🔐 HTTPS + SSL Config
+
+File: /etc/apache2/sites-available/editor.soft84ya.shop-le-ssl.conf
+
 <IfModule mod_ssl.c>
 <VirtualHost *:443>
     ServerName editor.soft84ya.shop
@@ -27,16 +46,13 @@ editor.soft84ya.shop-le-ssl.conf
     SSLCertificateFile /etc/letsencrypt/live/editor.soft84ya.shop/fullchain.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/editor.soft84ya.shop/privkey.pem
     Include /etc/letsencrypt/options-ssl-apache.conf
-    
- # Preserve the original host header
+
     ProxyPreserveHost On
     AllowEncodedSlashes NoDecode
 
-    # Standard HTTP Reverse Proxy
     ProxyPass / http://localhost:8079/ nocanon
     ProxyPassReverse / http://localhost:8079/
 
-    # WebSocket Reverse Proxy
     RewriteEngine On
     RewriteCond %{HTTP:Upgrade} =websocket [NC]
     RewriteRule /(.*) ws://localhost:8079/$1 [P,L]
@@ -45,34 +61,32 @@ editor.soft84ya.shop-le-ssl.conf
 
 </VirtualHost>
 </IfModule>
-=========================================================================
-editor.soft84ya.shop.conf
-<VirtualHost *:80>
-    ServerName editor.soft84ya.shop
 
-    Redirect permanent / https://editor.soft84ya.shop/
-</VirtualHost>
+🔧 Enable Required Apache Modules
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo a2enmod proxy_wstunnel
+sudo a2enmod rewrite
+sudo a2enmod ssl
 
+📜 Enable Site
 
+sudo a2ensite editor.soft84ya.shop.conf
+sudo a2ensite editor.soft84ya.shop-le-ssl.conf
+sudo systemctl reload apache2
 
+🔐 SSL Certificate (Let's Encrypt)
 
-
-
-
-
-
-
-
-
+sudo certbot --apache -d editor.soft84ya.shop
 
 
 
+🌍 Access
+
+After setup:
 
 
-
-
-
-
+https://editor.soft84ya.shop
 
 
 
@@ -87,6 +101,12 @@ editor.soft84ya.shop.conf
 
 
 
-    
+
+
+
+
+
+
+
 
 
